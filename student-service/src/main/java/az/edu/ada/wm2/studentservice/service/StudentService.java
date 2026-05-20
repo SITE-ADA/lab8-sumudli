@@ -16,6 +16,7 @@ public class StudentService {
     private final StudentRepository studentRepository;
 
     public StudentResponseDto createStudent(StudentRequestDto requestDto) {
+
         Student student = Student.builder()
                 .firstName(requestDto.getFirstName())
                 .lastName(requestDto.getLastName())
@@ -24,10 +25,12 @@ public class StudentService {
                 .build();
 
         Student savedStudent = studentRepository.save(student);
+
         return toResponseDto(savedStudent);
     }
 
     public List<StudentResponseDto> getAllStudents() {
+
         return studentRepository.findAll()
                 .stream()
                 .map(this::toResponseDto)
@@ -35,11 +38,23 @@ public class StudentService {
     }
 
     public StudentResponseDto getStudentById(Long id) {
+
         Student student = findStudentOrThrow(id);
+
+        return toResponseDto(student);
+    }
+
+    public StudentResponseDto getStudentByName(String name) {
+
+        Student student = studentRepository.findByFirstNameIgnoreCase(name)
+                .orElseThrow(() ->
+                        new RuntimeException("Student not found with name: " + name));
+
         return toResponseDto(student);
     }
 
     public StudentResponseDto updateStudent(Long id, StudentRequestDto requestDto) {
+
         Student existingStudent = findStudentOrThrow(id);
 
         existingStudent.setFirstName(requestDto.getFirstName());
@@ -48,20 +63,25 @@ public class StudentService {
         existingStudent.setAge(requestDto.getAge());
 
         Student updatedStudent = studentRepository.save(existingStudent);
+
         return toResponseDto(updatedStudent);
     }
 
     public void deleteStudent(Long id) {
+
         Student student = findStudentOrThrow(id);
+
         studentRepository.delete(student);
     }
 
     private Student findStudentOrThrow(Long id) {
+
         return studentRepository.findById(id)
                 .orElseThrow(() -> new StudentNotFoundException(id));
     }
 
     private StudentResponseDto toResponseDto(Student student) {
+
         return new StudentResponseDto(
                 student.getId(),
                 student.getFirstName(),
